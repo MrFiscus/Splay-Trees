@@ -1,0 +1,222 @@
+#include "splay.h"
+
+// default constructor
+SplayTree::SplayTree()
+{
+    root = nullptr;
+}
+
+// aka Zig (Right rotation around x)
+SplayTree::Node* SplayTree::rotateRight(Node* x)
+{
+    if (x == nullptr) return x;
+
+    Node* y = x->left;
+    if (y == nullptr) return x;
+
+    // Move y's right subtree to x's left
+    x->left = y->right;
+    if (y->right != nullptr)
+        y->right->parent = x;
+
+    // Link y to x's parent
+    y->parent = x->parent;
+
+    if (x->parent != nullptr) {
+        if (x->parent->left == x) x->parent->left = y;
+        else x->parent->right = y;
+    }
+
+    // Put x on y's right
+    y->right = x;
+    x->parent = y;
+
+    return y;
+}
+
+// aka Zag (Left rotation around x)
+SplayTree::Node* SplayTree::rotateLeft(Node* x)
+{
+    if (x == nullptr) return x;
+
+    Node* y = x->right;
+    if (y == nullptr) return x;
+
+    // Move y's left subtree to x's right
+    x->right = y->left;
+    if (y->left != nullptr)
+        y->left->parent = x;
+
+    // Link y to x's parent
+    y->parent = x->parent;
+
+    if (x->parent != nullptr) {
+        if (x->parent->left == x) x->parent->left = y;
+        else x->parent->right = y;
+    }
+
+    // Put x on y's left
+    y->left = x;
+    x->parent = y;
+
+    return y;
+}
+
+// Bottom-up splay: search key (or last accessed) and splay it to root
+SplayTree::Node* SplayTree::splay(Node* root, int key)
+{
+    if (root == nullptr) return nullptr;
+
+    // 1) BST-search for key or last accessed node
+    Node* x = root;
+    Node* last = root;
+
+    while (x != nullptr) {
+        last = x;
+        if (key < x->key) x = x->left;
+        else if (key > x->key) x = x->right;
+        else break;
+    }
+
+    if (x == nullptr) x = last; // not found -> splay last accessed
+
+    // 2) Splay x up to root using parent pointers
+    while (x->parent != nullptr) {
+        Node* p = x->parent;
+        Node* g = p->parent;
+
+        // Zig step (parent is root)
+        if (g == nullptr) {
+            if (p->left == x) rotateRight(p);
+            else rotateLeft(p);
+        }
+        // Zig-Zig
+        else if (g->left == p && p->left == x) {
+            rotateRight(g);
+            rotateRight(p);
+        }
+        else if (g->right == p && p->right == x) {
+            rotateLeft(g);
+            rotateLeft(p);
+        }
+        // Zig-Zag
+        else if (g->left == p && p->right == x) {
+            rotateLeft(p);
+            rotateRight(g);
+        }
+        else {
+            rotateRight(p);
+            rotateLeft(g);
+        }
+    }
+
+    return x; // now root
+}
+
+SplayTree::Node* SplayTree::insertNode(Node* root, int key)
+{
+    // Normal BST insert, track parent pointers
+    if (root == nullptr) {
+        return new Node(key);
+    }
+
+    Node* cur = root;
+    Node* prev = nullptr;
+
+    while (cur != nullptr) {
+        prev = cur;
+        if (key < cur->key) cur = cur->left;
+        else if (key > cur->key) cur = cur->right;
+        else {
+            // Key already exists -> splay it anyway
+            return splay(root, key);
+        }
+    }
+
+    Node* newNode = new Node(key);
+    newNode->parent = prev;
+
+    if (key < prev->key) prev->left = newNode;
+    else prev->right = newNode;
+
+    // Splay inserted key to root
+    return splay(root, key);
+}
+
+SplayTree::Node* SplayTree::deleteNode(Node* root, int key)
+{
+    if (root == nullptr) return nullptr;
+
+    // Bring key (or closest) to root
+    root = splay(root, key);
+
+    // If key not found, no deletion
+    if (root == nullptr || root->key != key) return root;
+
+    Node* leftSub = root->left;
+    Node* rightSub = root->right;
+
+    if (leftSub != nullptr) leftSub->parent = nullptr;
+    if (rightSub != nullptr) rightSub->parent = nullptr;
+
+    delete root;
+
+    // If no left subtree, right becomes new root
+    if (leftSub == nullptr) {
+        return rightSub;
+    }
+
+    // Find maximum node in left subtree
+    Node* m = leftSub;
+    while (m->right != nullptr) m = m->right;
+
+    // Splay that maximum to root of left subtree
+    leftSub = splay(leftSub, m->key);
+
+    // Attach right subtree
+    leftSub->right = rightSub;
+    if (rightSub != nullptr) rightSub->parent = leftSub;
+
+    return leftSub;
+}
+
+void SplayTree::insert(int key)
+{
+    root = insertNode(root, key);
+}
+
+void SplayTree::remove(int key)
+{
+    root = deleteNode(root, key);
+}
+
+bool SplayTree::search(int key)
+{
+    root = splay(root, key);
+    return (root != nullptr && root->key == key);
+}
+
+void SplayTree::printTree(Node* root, int space)
+{
+    const int COUNT = 10;
+
+    if (root == nullptr)
+        return;
+
+    space += COUNT;
+
+    printTree(root->right, space);
+
+    for (int i = COUNT; i < space; i++)
+        cout << " ";
+
+    cout << root->key << endl;
+
+    printTree(root->left, space);
+}
+
+void SplayTree::display()
+{
+    printTree(root, 0);
+    cout << endl;
+}
