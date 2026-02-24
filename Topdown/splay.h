@@ -1,5 +1,5 @@
-#ifndef SPLAYTREE_H
-#define SPLAYTREE_H
+#ifndef SPLAYTREEH_H
+#define SPLAYTREEH_H
 
 #include <iostream>
 using namespace std;
@@ -10,10 +10,13 @@ class SplayTree {
             int key;
             Node* left;
             Node* right;
+            Node* parent;
+            
             Node(int k) {
                 key = k;
                 left = nullptr;
-                right = nullptr; 
+                right = nullptr;
+                parent=nullptr; 
             }
         };
 
