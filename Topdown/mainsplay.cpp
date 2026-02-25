@@ -14,11 +14,11 @@ int main() {
     tree.display();
 
     tree.search(44);
-    cout << "Tree after splaying 40: ";
+    cout << "Tree after splaying 44: ";
     tree.display();
 
     tree.remove(31);
-    cout << "Tree after deleting 30: ";
+    cout << "Tree after deleting 31: ";
     tree.display();
 
     return 0;

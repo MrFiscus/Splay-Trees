@@ -1,4 +1,5 @@
 #include "splay.h"
+#include "customErrorClass.h" 
 
 // default constructor
 SplayTree::SplayTree()
@@ -9,10 +10,10 @@ SplayTree::SplayTree()
 // aka Zig (Right rotation around x)
 SplayTree::Node* SplayTree::rotateRight(Node* x)
 {
-    if (x == nullptr) return x;
+    if (x == nullptr) throw MyException("error");
 
     Node* y = x->left;
-    if (y == nullptr) return x;
+    if (y == nullptr) throw MyException("error");
 
     // Move y's right subtree to x's left
     x->left = y->right;
@@ -37,10 +38,10 @@ SplayTree::Node* SplayTree::rotateRight(Node* x)
 // aka Zag (Left rotation around x)
 SplayTree::Node* SplayTree::rotateLeft(Node* x)
 {
-    if (x == nullptr) return x;
+    if (x == nullptr) throw MyException("error");
 
     Node* y = x->right;
-    if (y == nullptr) return x;
+    if (y == nullptr) throw MyException("error");
 
     // Move y's left subtree to x's right
     x->right = y->left;
@@ -128,8 +129,8 @@ SplayTree::Node* SplayTree::insertNode(Node* root, int key)
         if (key < cur->key) cur = cur->left;
         else if (key > cur->key) cur = cur->right;
         else {
-            // Key already exists -> splay it anyway
-            return splay(root, key);
+            // Duplicate key -> throw (as requested)
+            throw MyException("error");
         }
     }
 
@@ -145,13 +146,13 @@ SplayTree::Node* SplayTree::insertNode(Node* root, int key)
 
 SplayTree::Node* SplayTree::deleteNode(Node* root, int key)
 {
-    if (root == nullptr) return nullptr;
+    if (root == nullptr) throw MyException("error");
 
     // Bring key (or closest) to root
     root = splay(root, key);
 
-    // If key not found, no deletion
-    if (root == nullptr || root->key != key) return root;
+    // If key not found, throw
+    if (root == nullptr || root->key != key) throw MyException("error");
 
     Node* leftSub = root->left;
     Node* rightSub = root->right;
@@ -192,8 +193,13 @@ void SplayTree::remove(int key)
 
 bool SplayTree::search(int key)
 {
+    if (root == nullptr) throw MyException("error");
+
     root = splay(root, key);
-    return (root != nullptr && root->key == key);
+
+    if (root == nullptr || root->key != key) throw MyException("error");
+
+    return true;
 }
 
 void SplayTree::printTree(Node* root, int space)
@@ -217,6 +223,8 @@ void SplayTree::printTree(Node* root, int space)
 
 void SplayTree::display()
 {
+    if (root == nullptr) throw MyException("error");
+
     printTree(root, 0);
     cout << endl;
 }
