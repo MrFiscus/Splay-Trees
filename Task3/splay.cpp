@@ -208,6 +208,92 @@ SplayTree::Node* SplayTree::deleteNode(Node* root, int key)
     return leftSub;
 }
 
+SplayTree::Node* SplayTree::weightedSplay(Node* root, int key)
+{
+    if (root == nullptr) return nullptr;
+
+    Node header(0);
+    header.left = nullptr;
+    header.right = nullptr;
+    header.parent = nullptr;
+
+    Node* leftTreeMax  = &header;
+    Node* rightTreeMin = &header;
+
+    root->parent = nullptr;
+
+    while (true) {
+
+        if (key < root->key) {
+
+            if (root->left == nullptr) break;
+
+            if (key < root->left->key) {
+                Node* child = root->left;
+                if (child != nullptr && child->weight >= root->weight) {
+                    root = rotateRight(root);  
+                    root->parent = nullptr;
+                    if (root->left == nullptr) break;
+                }
+            }
+
+            // link current root into right tree
+            rightTreeMin->left = root;
+            if (rightTreeMin != &header) root->parent = rightTreeMin;
+            rightTreeMin = root;
+
+            root = root->left;
+            root->parent = nullptr;
+            rightTreeMin->left = nullptr;
+        }
+        else if (key > root->key) {
+
+            if (root->right == nullptr) break;
+
+            // OPTION 1: rotate only if child weight >= parent weight
+            if (key > root->right->key) {
+                Node* child = root->right;
+                if (child != nullptr && child->weight >= root->weight) {
+                    root = rotateLeft(root);
+                    root->parent = nullptr;
+                    if (root->right == nullptr) break;
+                }
+            }
+
+            // link current root into left tree
+            leftTreeMax->right = root;
+            if (leftTreeMax != &header) root->parent = leftTreeMax;
+            leftTreeMax = root;
+
+            root = root->right;
+            root->parent = nullptr;
+            leftTreeMax->right = nullptr;
+        }
+        else {
+            break; // found key
+        }
+    }
+ 
+    leftTreeMax->right = root->left;
+    if (leftTreeMax->right != nullptr)
+        leftTreeMax->right->parent = leftTreeMax;
+
+    rightTreeMin->left = root->right;
+    if (rightTreeMin->left != nullptr)
+        rightTreeMin->left->parent = rightTreeMin;
+
+    root->left = header.right;
+    if (root->left != nullptr)
+        root->left->parent = root;
+
+    root->right = header.left;
+    if (root->right != nullptr)
+        root->right->parent = root;
+
+    root->parent = nullptr;
+    return root;
+}
+
 void SplayTree::insert(int key)
 {
     root = insertNode(root, key);
@@ -222,10 +308,11 @@ bool SplayTree::search(int key)
 {
     if (root == nullptr) throw MyException("error");
 
-    root = splay(root, key);
+    root = weightedSplay(root, key);
 
-    if (root == nullptr || root->key != key) throw MyException("error");
-
+    if (root == nullptr || root->key != key) 
+    throw MyException("error");
+    root-> weight++; 
     return true;
 }
 
@@ -243,7 +330,7 @@ void SplayTree::printTree(Node* root, int space)
     for (int i = COUNT; i < space; i++)
         cout << " ";
 
-    cout << root->key << endl;
+    cout << root->key << "rootweight:" << root->weight << endl;
 
     printTree(root->left, space);
 }

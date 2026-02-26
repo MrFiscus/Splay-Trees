@@ -12,11 +12,13 @@ class SplayTree {
             Node* right;
             Node* parent;
             
+            int weight;
             Node(int k) {
                 key = k;
                 left = nullptr;
                 right = nullptr;
                 parent=nullptr; 
+                weight= 0;
             }
         };
 
@@ -27,7 +29,7 @@ class SplayTree {
         Node* splay(Node* root, int key);
         Node* insertNode(Node* root, int key);
         Node* deleteNode(Node* root, int key);
-
+        Node* weightedSplay(Node* root, int key);
         void printTree(Node* root, int space);
 
     public:
