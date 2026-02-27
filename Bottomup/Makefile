@@ -1,28 +1,22 @@
-CC := g++
-CFLAGS := -Wall -std=c++11
+CXX := g++
+CXXFLAGS := -Wall -Wextra -std=c++17 -O2
 
 TARGET := splay
-
-OBJS := mainsplay.o splay.o customErrorClass.o
+SRCS := mainsplay.cpp splay.cpp customErrorClass.cpp
+OBJS := $(SRCS:.cpp=.o)
 
 .PHONY: all clean run
 
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-mainsplay.o: mainsplay.cpp
-	$(CC) -c $<
-
-splay.o: splay.cpp
-	$(CC) -c $<
-
-customErrorClass.o: customErrorClass.cpp
-	$(CC) -c $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	del /F /Q mainsplay.o splay.o customErrorClass.o splay.exe 2>NUL
+	rm -f $(OBJS) $(TARGET) splay.exe

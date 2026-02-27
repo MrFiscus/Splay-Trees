@@ -11,14 +11,17 @@ int main() {
     tree.insert(83);
 
     cout << "Tree after insertions: ";
+      cout << "----------------------" << endl;
     tree.display();
 
     tree.search(44);
     cout << "Tree after splaying 44: ";
+      cout << "----------------------" << endl;
     tree.display();
 
     tree.remove(31);
     cout << "Tree after deleting 31: ";
+      cout << "----------------------" << endl;
     tree.display();
 
     return 0;

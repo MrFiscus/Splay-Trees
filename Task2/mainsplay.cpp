@@ -21,6 +21,7 @@ int main() {
 
     tree.remove(31);
     cout << "Tree after deleting 31: ";
+     cout << "----------------------" << endl;
     tree.display();
 
     return 0;
